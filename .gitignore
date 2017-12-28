@@ -1,0 +1,10 @@
+.DS_Store
+CMakeFiles
+Makefile
+CMakeCache.txt
+CMakeLists.txt
+*.png
+radial
+*.cmake
+*.dSYM
+images
