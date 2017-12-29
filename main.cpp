@@ -8,6 +8,9 @@
 #include <random>
 #include <cmath>
 
+#include <omp.h>
+
+
 typedef std::complex<double> dcomp;
 
 struct Pixel {
@@ -94,6 +97,7 @@ void radialJulia(std::string file_name,
                  size_t thread_count = 4)
 {
     Image img(width, height);
+#pragma omp parallel for
     for (size_t i = 0; i < width; ++i)
     {
         radialJuliaLine(i, c, img, width, height, max_iterations, rmin, rmax, tmin, tmax);
@@ -114,10 +118,10 @@ dcomp randomComplex(const dcomp min_val, const dcomp max_val)
 
 void randomWalkJuliaSet(size_t frame_count, std::string output_dir, double dc)
 {
-    dcomp startPt = randomComplex(dcomp(0.20, 0.25), dcomp(0.30, 0.5));
+    dcomp startPt = randomComplex(dcomp(0.20, 0.25), dcomp(0.50, 0.5));
     double real_dir = 1.0;
     double imag_dir = -1.0;
-    dcomp lower_bound( -0.5, -0.5);
+    dcomp lower_bound( 0.125, -0.5);
     dcomp upper_bound(0.5, 0.5);
 
     const dcomp min_val = dcomp(0.0, 0.0);
@@ -125,6 +129,7 @@ void randomWalkJuliaSet(size_t frame_count, std::string output_dir, double dc)
     
     for (size_t frame = 0; frame < frame_count; ++frame)
     {
+        std::cout << "Rendering " << startPt << "\n";
         char buffer[512]={0};
         snprintf(buffer, 512, "%s/juliaset%06ul.png", output_dir.c_str(), frame);
         radialJulia(buffer,
@@ -133,7 +138,10 @@ void randomWalkJuliaSet(size_t frame_count, std::string output_dir, double dc)
                     0.0, 1.25,
                     0.0, 2 * 3.141592654,
                     4);
-        startPt += dcomp(real_dir, imag_dir) * randomComplex(min_val, max_val);
+        dcomp dc = dcomp(real_dir, imag_dir);
+        dcomp randVal = randomComplex(min_val, max_val);
+        std::cout << "dcomp(real_dir, imag_dir) *  = " << dc << " " << randVal << " = " << (dc * randVal) << "\n";
+        startPt += dc * randVal;
         if (std::real(startPt) > std::real(upper_bound))
         {
             real_dir = -real_dir;
