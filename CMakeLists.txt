@@ -1,5 +1,5 @@
 PROJECT(radial CXX)
-set(CMAKE_CXX_FLAGS "-O2 -fopenmp --std=c++1y ${CMAKE_C_FLAGS}")
+set(CMAKE_CXX_FLAGS "-O3 -Xclang -fopenmp --std=c++1y ${CMAKE_C_FLAGS}")
 cmake_minimum_required(VERSION 2.6)
 include_directories("/usr/local/Cellar/libpng/1.6.17/include/libpng16" "/opt/local/include")
 ADD_EXECUTABLE(radial main.cpp)

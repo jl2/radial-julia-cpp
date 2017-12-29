@@ -10,7 +10,6 @@
 
 #include <omp.h>
 
-
 typedef std::complex<double> dcomp;
 
 struct Pixel {
@@ -97,11 +96,13 @@ void radialJulia(std::string file_name,
                  size_t thread_count = 4)
 {
     Image img(width, height);
+
 #pragma omp parallel for
     for (size_t i = 0; i < width; ++i)
     {
         radialJuliaLine(i, c, img, width, height, max_iterations, rmin, rmax, tmin, tmax);
     }
+
     img.ToFile(file_name);
 }
 
@@ -127,7 +128,7 @@ void randomWalkJuliaSet(size_t frame_count, std::string output_dir, double dc)
     const dcomp min_val = dcomp(0.0, 0.0);
     const dcomp max_val = dcomp(dc, dc);
     
-    for (size_t frame = 0; frame < frame_count; ++frame)
+    for (unsigned int frame = 0; frame < frame_count; ++frame)
     {
         std::cout << "Rendering " << startPt << "\n";
         char buffer[512]={0};
@@ -140,24 +141,29 @@ void randomWalkJuliaSet(size_t frame_count, std::string output_dir, double dc)
                     4);
         dcomp dc = dcomp(real_dir, imag_dir);
         dcomp randVal = randomComplex(min_val, max_val);
-        std::cout << "dcomp(real_dir, imag_dir) *  = " << dc << " " << randVal << " = " << (dc * randVal) << "\n";
-        startPt += dc * randVal;
+        startPt += dcomp(real_dir * std::real(randVal), imag_dir * std::imag(randVal));
+
         if (std::real(startPt) > std::real(upper_bound))
         {
             real_dir = -real_dir;
+            startPt = dcomp(std::real(upper_bound), std::imag(startPt));
         }
+
         if (std::imag(startPt) > std::imag(upper_bound))
         {
             imag_dir = -imag_dir;
+            startPt = dcomp(std::real(startPt), std::imag(upper_bound));
         }
 
         if (std::real(startPt) < std::real(lower_bound))
         {
             real_dir = -real_dir;
+            startPt = dcomp(std::real(lower_bound), std::imag(startPt));
         }
         if (std::imag(startPt) < std::imag(lower_bound))
         {
             imag_dir = -imag_dir;
+            startPt = dcomp(std::real(startPt), std::imag(lower_bound));
         }
 
     }
